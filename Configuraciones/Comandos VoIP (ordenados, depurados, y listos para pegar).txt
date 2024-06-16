@@ -1,0 +1,89 @@
+!==============================ROUTER 0=========================================
+enable
+configure terminal
+hostname R0
+configure terminal
+router ospf 1 
+network 192.10.1.0 0.0.0.255 area 0
+network 10.10.10.0 0.0.0.3 area 0
+end
+exit
+enable
+configure terminal
+telephony-service
+max-ephones 4
+max-dn 4
+ip source-address 192.10.1.1 port 2000
+auto assign 1 to 4
+end
+exit
+enable
+configure terminal
+ephone-dn 1
+number 1001
+ephone-dn 2
+number 1002
+ephone-dn 3
+number 1003
+ephone-dn 4
+number 1004
+end 
+exit
+enable
+configure terminal
+interface FastEthernet0/0
+ip address 192.10.1.1 255.255.255.0
+no shutdown
+interface Serial0/0/0
+clock rate 128000
+ip address 10.10.10.1 255.255.255.252
+no shutdown
+ip dhcp excluded-address 192.10.1.1 192.10.1.9
+ip dhcp pool POOL01
+network 192.10.1.0 255.255.255.0
+default-router 192.10.1.1
+option 150 ip 192.10.1.1
+dns-server 192.10.1.3
+ip dhcp excluded-address 192.10.2.1 192.10.2.9
+ip dhcp pool POOL02
+network 192.10.2.0 255.255.255.0
+default-router 192.10.2.1
+option 150 ip 192.10.1.1
+dns-server 192.10.1.3
+end
+exit
+!==============================ROUTER 1=========================================
+enable
+configure terminal
+hostname R1
+interface FastEthernet0/0
+ip address 192.10.2.1 255.255.255.0
+no shutdown
+exit
+interface Serial0/0/0
+clock rate 128000
+ip address 10.10.10.2 255.255.255.252
+no shutdown
+exit
+router ospf 1
+network 192.10.2.0 0.0.0.255 area 0
+network 10.10.10.0 0.0.0.3 area 0
+do show ip route
+interface fa 0/0
+ip helper-address 192.10.1.1
+end 
+exit
+!==============================Switch0=========================================
+enable
+configure terminal
+interface range f0/4-5
+switchport voice vlan 1
+end
+exit
+!==============================Switch1=========================================
+enable
+configure terminal
+interface range f0/4-5
+switchport voice vlan 1
+end
+exit
